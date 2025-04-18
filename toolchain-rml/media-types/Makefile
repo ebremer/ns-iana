@@ -3,17 +3,17 @@ SOP ?= /home/pa/.cargo/bin/sop
 RML ?= /opt/rml/rmlmapper.jar
 
 # ⚠ the hash character ('#') MUST be escaped in the prefix declarations
-RML_PREFIXES=rml:http://semweb.mmlab.be/ns/rml\#,rr:http://www.w3.org/ns/r2rml\#
+RML_PREFIXES=rml:http://w3id.org/rml/
 APP_PREFIXES=reg:https://www.w3.org/ns/assignments/reg\#,dct:http://purl.org/dc/terms/
 
 .PHONY: dispatch
 dispatch: out.nq .check-tools
-	<out.nq sed 's|<x-relative:?|<|g' | ${SOP} dispatch x-output:/ --overwrite -d ../../out -p "${APP_PREFIXES}"
+	${SOP} parse out.nq ! dispatch https://www.w3.org/ns/iana/ -d ../../out --overwrite --relativize -p "${APP_PREFIXES}"
 	cp ../../toolchain-rabel/media-types/index.html ../../out/media-types/index.html
 
 .PHONY: inspect
 inspect: out.nq .check-tools
-	<out.nq sed 's|<x-relative:?|<|g' | ${SOP} serialize -f trig -p "${APP_PREFIXES}"
+	${SOP} parse out.nq ! relativize https://www.w3.org.ns/iana/media-types/ ! serialize -f trig -p "${APP_PREFIXES}"
 
 out.nq: map.ttl media-types.xml .check-tools
 	@if grep '<UNDEFINED:' map.ttl; then echo >&2 "typos detected in map.ttl"; false; fi
